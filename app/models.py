@@ -26,3 +26,16 @@ enrollment = db.Table('enrollment',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('course_id', db.Integer, db.ForeignKey('course.id'))
 )
+
+class Exam(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+    course = db.relationship('Course', backref='exams')
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(200), nullable=False)
+    answer = db.Column(db.String(200), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'))
+    exam = db.relationship('Exam', backref='questions')

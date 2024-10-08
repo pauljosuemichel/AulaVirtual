@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Crear Examen{% endblock %}
+
+{% block content %}
+<h2>Crear Examen para el curso: {{ course.name }}</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.title.label }}<br>
+        {{ form.title(size=32) }}<br>
+        {% for error in form.title.errors %}
+        <span style="color: red">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <h3>Preguntas</h3>
+    {% for question in form.questions %}
+        <div>
+            {{ question.question.label }}<br>
+            {{ question.question(size=32) }}<br>
+        </div>
+        <div>
+            {{ question.answer.label }}<br>
+            {{ question.answer(size=32) }}<br>
+        </div>
+    {% endfor %}
+
+    <div>{{ form.submit() }}</div>
+</form>
+{% endblock %}
