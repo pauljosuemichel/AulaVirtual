@@ -30,8 +30,6 @@ def courses():
     return render_template('courses.html', courses=courses)
 
 
-main = Blueprint('main', __name__)
-
 @main.route('/course/<int:course_id>/materials', methods=['GET', 'POST'])
 @login_required
 def upload_material(course_id):
