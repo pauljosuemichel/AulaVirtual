@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from .models import User, Course, Material, db
-from .forms import LoginForm, RegistrationForm, MaterialForm, CourseForm
+from .forms import LoginForm, RegistrationForm, MaterialForm, CourseForm, AssignStudentForm, UploadMaterialForm
 from flask_login import current_user, login_required, login_user, logout_user
 
 main = Blueprint('main', __name__)
@@ -70,19 +72,50 @@ def create_course():
 
 
 
-@main.route('/course/<int:course_id>/materials', methods=['GET', 'POST'])
+
+@main.route('/assign_student/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+def assign_student(course_id):
+    course = Course.query.get_or_404(course_id)
+    form = AssignStudentForm()
+    
+    # Poblamos el SelectField con los usuarios (estudiantes) que no están asignados a este curso
+    form.student.choices = [(student.id, student.username) for student in User.query.all() if student not in course.students]
+    
+    if form.validate_on_submit():
+        student = User.query.get(form.student.data)
+        if student:
+            # Asignar el estudiante al curso
+            course.students.append(student)
+            db.session.commit()
+            flash(f'Estudiante {student.username} asignado al curso {course.name}.', 'success')
+            return redirect(url_for('main.courses'))
+    
+    return render_template('assign_student.html', form=form, course=course)
+
+
+
+
+@main.route('/upload_material/<int:course_id>', methods=['GET', 'POST'])
 @login_required
 def upload_material(course_id):
-    form = MaterialForm()
     course = Course.query.get_or_404(course_id)
+    form = UploadMaterialForm()
 
-    if request.method == 'POST' and form.validate_on_submit():
-        # Aquí puedes añadir la lógica para guardar el archivo en el servidor
-        material = Material(title=form.title.data, file_path="ruta_del_archivo", course_id=course.id)
+    if form.validate_on_submit():
+        # Guardar el archivo en el servidor
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Crear el nuevo material y guardarlo en la base de datos
+        material = Material(title=form.title.data, file_path=file_path, course_id=course.id)
         db.session.add(material)
         db.session.commit()
-        flash('Material subido con éxito')
-        return redirect(url_for('main.course_detail', course_id=course.id))
+
+        flash('Material subido exitosamente.', 'success')
+        return redirect(url_for('main.courses'))
 
     return render_template('upload_material.html', form=form, course=course)
 
@@ -110,3 +143,13 @@ def create_exam(course_id):
         return redirect(url_for('main.course_detail', course_id=course.id))
 
     return render_template('create_exam.html', form=form, course=course)
+
+
+@main.route('/view_students/<int:course_id>')
+@login_required
+def view_students(course_id):
+    course = Course.query.get_or_404(course_id)
+    students = course.students  # Obtener los estudiantes asignados a este curso
+    
+    return render_template('view_students.html', course=course, students=students)
+

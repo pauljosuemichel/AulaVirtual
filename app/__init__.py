@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -13,6 +14,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'f5b4c3e7a1f38f841a1fbba779f3acd70e32a3a79c31f8c3'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://ube4fcqrzl0mmiau:SqvA7bBLmB0wHewnFrN5@b0xhxyxbeaxlnhzyfa2m-mysql.services.clever-cloud.com/b0xhxyxbeaxlnhzyfa2m'  # Ajusta según tu configuración
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path, 'uploads')
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Inicializar las extensiones
     db.init_app(app)

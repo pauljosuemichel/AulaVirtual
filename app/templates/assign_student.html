@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Asignar Estudiante al Curso
+{% endblock %}
+
+{% block content %}
+    <h2>Asignar Estudiante al Curso: {{ course.name }}</h2>
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div>
+            {{ form.student.label }}<br>
+            {{ form.student() }}<br>
+            {% for error in form.student.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+    
+    <br>
+    <a href="{{ url_for('main.courses') }}">Volver a la Lista de Cursos</a>
+{% endblock %}
