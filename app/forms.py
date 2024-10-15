@@ -12,6 +12,12 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+
+class CourseForm(FlaskForm):
+    name = StringField('Nombre del Curso', validators=[DataRequired()])
+    submit = SubmitField('Crear Curso')
+
+
 class MaterialForm(FlaskForm):
     title = StringField('Título del Material', validators=[DataRequired()])
     file = FileField('Subir Archivo', validators=[DataRequired()])
